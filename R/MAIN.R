@@ -1,15 +1,15 @@
 #' @title MR GENIUS under additive outcome model
-#' 
+#'
 #' @description
 #' Implements MR GENIUS under an additive outcome model.
 #'
 #' @details
 #' This function implements the estimators given in equations (6) and (12) of Tchetgen Tchetgen et al (2017) for single and multiple instruments, respectively. The term
-#' \eqn{E(A|G)} is modelled under the logit and identity links for binary and continuous exposure respectively, with a default linear predictor consisting of the main effects of all available instruments.  
+#' \eqn{E(A|G)} is modelled under the logit and identity links for binary and continuous exposure respectively, with a default linear predictor consisting of the main effects of all available instruments.
 #'
 #' @references
 #' Tchetgen Tchetgen, E., Sun, B. and Walter, S. (2017). \href{https://arxiv.org/abs/1709.07779}{The GENIUS Approach to Robust Mendelian Randomization Inference}. arXiv e-prints.
-#' 
+#'
 #' @param Y A numeric vector of outcomes.
 #' @param A A numeric vector of exposures (binary values should be coded in 0/1).
 #' @param G A numeric matrix of instruments; each column stores values for one instrument (a numeric vector if only a single instrument is available).
@@ -50,8 +50,8 @@
 #'
 #'genius_addY(Y,A,G);
 #'
-#'### specify a more richly parameterized linear predictor for the model 
-#'### of E[A|G] containing all main effects and pairwise interactions of 
+#'### specify a more richly parameterized linear predictor for the model
+#'### of E[A|G] containing all main effects and pairwise interactions of
 #'### instruments
 #'
 #'colnames(G)=paste("g",1:10,sep="")
@@ -85,7 +85,7 @@ genius_addY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 	if (is.data.frame(G)) {
 		G=data.matrix(G)
 	}
-	if (class(G) == "matrix") {
+	if (is.matrix(G)) {
 		#number of IVs
   		nIV =dim(G)[2];
 		#sample size
@@ -115,11 +115,11 @@ genius_addY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 		beta.est=gmm.out$coef;
 
 		if (A.binary) {
-			mm= mm.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			M = M.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		} else {
-			mm= mm.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			M = M.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		}
@@ -132,14 +132,14 @@ genius_addY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 		} else {
 			glm.AG = stats::lm(formula(formula), x=T, data=cbind(A,as.data.frame(G)));
 		}
-		#single-IV estimator 
+		#single-IV estimator
 		beta.est=mean((G-mean(G))* (A-glm.AG$fit) * Y)/mean((G-mean(G))* (A-glm.AG$fit) * A);
 
 		if (A.binary) {
-			mm= mm.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.binary(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		} else {
-			mm= mm.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.linear(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		}
 		beta.var=diag((1/N)*(solve(B))%*%mm%*%t((solve(B))))[nIV+length(glm.AG$coef)+1];
@@ -157,17 +157,17 @@ genius_addY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 
 
 #' @title MR GENIUS under multiplicative outcome model
-#' 
+#'
 #' @description
 #' Implements MR GENIUS under a multiplicative outcome model.
 #'
 #' @details
 #' This function implements MR GENIUS as the solution to the empirical version of equation (14) in Tchetgen Tchetgen et al (2017). The term
-#' \eqn{E(A|G)} is modelled under the logit and identity links for binary and continuous exposure respectively, with a default linear predictor consisting of the main effects of all available instruments.  
+#' \eqn{E(A|G)} is modelled under the logit and identity links for binary and continuous exposure respectively, with a default linear predictor consisting of the main effects of all available instruments.
 #'
 #' @references
 #' Tchetgen Tchetgen, E., Sun, B. and Walter, S. (2017). \href{https://arxiv.org/abs/1709.07779}{The GENIUS Approach to Robust Mendelian Randomization Inference}. arXiv e-prints.
-#' 
+#'
 #' @param Y A numeric vector of outcomes.
 #' @param A A numeric vector of exposures (binary values should be coded in 0/1).
 #' @param G A numeric matrix of instruments; each column stores values for one instrument (a numeric vector if only a single instrument is available).
@@ -205,15 +205,15 @@ genius_addY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 #'
 #'genius_mulY(Y,A,G);
 #'
-#'### specify a more richly parameterized linear predictor for the model of E[A|G] 
-#'### containing all main effects and pairwise interactions of instruments                                                       
+#'### specify a more richly parameterized linear predictor for the model of E[A|G]
+#'### containing all main effects and pairwise interactions of instruments
 #'
 #'colnames(G)=paste("g",1:10,sep="")
 #'
 #'genius_mulY(Y,A,G,A~(g1+g2+g3+g4+g5+g6+g7+g8+g9+g10)^2);
 #'
 #'### continuous exposure
-#'nIV=10; N=2000; beta=0.25; 
+#'nIV=10; N=2000; beta=0.25;
 #'phi=rep(0.2,nIV); gamma=rep(0.5,nIV); alpha=rep(0.5,nIV);
 #'lambda0=0.5; lambda1=rep(0.5,nIV);
 #'Gn = mvrnorm(N,rep(0,nIV),diag(rep(1,nIV)))
@@ -266,11 +266,11 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 		beta.est=gmm.out$coef;
 
 		if (A.binary) {
-			mm= mm.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			M = M.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		} else {
-			mm= mm.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			M = M.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		}
@@ -283,7 +283,7 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 		} else {
 			glm.AG = stats::lm(formula(formula), x=T, data=cbind(A,as.data.frame(G)));
 		}
-		#single-IV estimator 
+		#single-IV estimator
 		est.fun <- function(x) {
 			mean((G-mean(G))* (A-glm.AG$fit) * (Y*exp(-x*A)));
 		}
@@ -291,10 +291,10 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 		beta.est=stats::uniroot(est.fun, c(lower,upper))$root;
 
 		if (A.binary) {
-			mm= mm.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.binary.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		} else {
-			mm= mm.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N); 
+			mm= mm.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 			B = B.linear.mulY(c(glm.AG$coef,beta.est), nIV, glm.AG$x, A, G, Y, N);
 		}
 		beta.var=diag((1/N)*(solve(B))%*%mm%*%t((solve(B))))[nIV+length(glm.AG$coef)+1];
@@ -308,16 +308,16 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 
 
 #' @title MR GENIUS under multiplicative exposure model
-#' 
+#'
 #' @description
 #' Implements MR GENIUS under a multiplicative exposure model.
 #'
 #' @details
-#' This function implements the estimator given in Lemma 3 of Tchetgen Tchetgen et al (2017), under a multiplicative exposure model. By default, the log ratio term in equation (9) is modelled as a linear combination of the main effects of all available instruments.  
+#' This function implements the estimator given in Lemma 3 of Tchetgen Tchetgen et al (2017), under a multiplicative exposure model. By default, the log ratio term in equation (9) is modelled as a linear combination of the main effects of all available instruments.
 #'
 #' @references
 #' Tchetgen Tchetgen, E., Sun, B. and Walter, S. (2017). \href{https://arxiv.org/abs/1709.07779}{The GENIUS Approach to Robust Mendelian Randomization Inference}. arXiv e-prints.
-#' 
+#'
 #' @param Y A numeric vector of outcomes.
 #' @param A A numeric vector of exposures (binary values should be coded in 0/1).
 #' @param G A numeric matrix of instruments; each column stores values for one instrument (a numeric vector if only a single instrument is available).
@@ -334,13 +334,13 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 #' @examples
 #'#the following package is needed to simulate data
 #'library("MASS")
-#'nIV=10; N=2000; beta=0.5; 
+#'nIV=10; N=2000; beta=0.5;
 #'gamma=rep(0.5,nIV); alpha=rep(0.5,nIV);phi=rep(0.05,nIV);
 #'Gn = mvrnorm(N,rep(0,nIV),diag(rep(1,nIV)))
 #'G  = (Gn>0)*1;
 #'U = as.vector(phi%*%t(G))+rnorm(N);
 #'#exposure generated from negative binomial distribution
-#'A = rnbinom(N,size=10,mu = exp(as.vector(gamma%*%t(G)) +0.1*U)) 
+#'A = rnbinom(N,size=10,mu = exp(as.vector(gamma%*%t(G)) +0.1*U))
 #'Y = as.vector(alpha%*%t(G)) + beta*A + U + rnorm(N);
 #'
 #'genius_mulA(Y,A,G);
@@ -392,7 +392,7 @@ genius_mulA <- function(Y,A,G,alpha=0.05,lower=-10,upper=10) {
 		beta.est=gmm.out$coef;
 
 		#estimated asymptotic variance
-		mm= mm.mulA(beta.est, pi.fit$par, nIV, A, G, Y, N); 
+		mm= mm.mulA(beta.est, pi.fit$par, nIV, A, G, Y, N);
 		M = M.mulA(beta.est, pi.fit$par, nIV,  A, G, Y, N);
 		B = B.mulA(beta.est, pi.fit$par, nIV,  A, G, Y, N);
 
@@ -404,12 +404,12 @@ genius_mulA <- function(Y,A,G,alpha=0.05,lower=-10,upper=10) {
 			mean(A*exp(-G*pi)*(G-mean(G)));
 		}
 		pi.fit <- BB::BBoptim(par = rep(0,nIV), fn = pi.func, A=A, G = G, quiet=TRUE);
-		#single-IV estimator 
+		#single-IV estimator
 		beta.est = mean((G-mean(G))*(as.vector(A*exp(-G*pi.fit$par))-mean((A*exp(-G*pi.fit$par))))*Y) /
 			     mean((G-mean(G))*(as.vector(A*exp(-G*pi.fit$par))-mean((A*exp(-G*pi.fit$par))))*A);
 
 		#estimated asymptotic variance
-		mm= mm.mulA(beta.est, pi.fit$par, nIV, A, G, Y, N); 
+		mm= mm.mulA(beta.est, pi.fit$par, nIV, A, G, Y, N);
 		B = B.mulA(beta.est, pi.fit$par, nIV, A, G, Y, N);
 
 		beta.var=diag((1/N)*(solve(B))%*%mm%*%t((solve(B))))[2*nIV+2];
@@ -423,7 +423,7 @@ genius_mulA <- function(Y,A,G,alpha=0.05,lower=-10,upper=10) {
 }
 
 #' @title Breusch-Pagan Test
-#' 
+#'
 #' @description
 #' Performs the Breusch-Pagan test against heteroskedasticity. This function is exported from the "lmtest" package (Achim Zeileis & Torsten Hothorn, 2002).
 #' This function provides a way to test the heteroskedasticity identification condition (5) in Lemma 1 of Tchetgen Tchetgen et al. (2017).
@@ -433,7 +433,7 @@ genius_mulA <- function(Y,A,G,alpha=0.05,lower=-10,upper=10) {
 #' The Breusch-Pagan test fits a linear regression model to the residuals
 #' of a linear regression model (by default the same explanatory variables are taken as in the main regression
 #' model) and rejects if too much of the variance is explained by the additional explanatory variables. Under H0 the test statistic of the Breusch-Pagan test follows a
-#' chi-squared distribution with \code{parameter} (the number of regressors without the constant in the model) degrees of freedom. 
+#' chi-squared distribution with \code{parameter} (the number of regressors without the constant in the model) degrees of freedom.
 #'
 #' @param formula a symbolic description for the model to be tested (or a fitted \code{"lm"} object).
 #' @param varformula a formula describing only the potential explanatory variables

@@ -237,7 +237,7 @@ genius_mulY <- function(Y,A,G,formula=A~G,alpha=0.05,lower=-10,upper=10) {
 	if (is.data.frame(G)) {
 		G=data.matrix(G)
 	}
-	if (class(G) == "matrix") {
+	if (is.matrix(G)){
 		#number of IVs
   		nIV =dim(G)[2];
 		#sample size
@@ -360,7 +360,7 @@ genius_mulA <- function(Y,A,G,alpha=0.05,lower=-10,upper=10) {
 	if (is.data.frame(G)) {
 		G=data.matrix(G)
 	}
-	if (class(G) == "matrix") {
+	if (is.matrix(G)) {
 		#number of IVs
   		nIV =dim(G)[2];
 		#sample size
